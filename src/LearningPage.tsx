@@ -1283,7 +1283,7 @@ function ChangeTimeDialog({
   );
 }
 
-/** Figma 34:7544 — modules shown in "Personalized Learning Path" (Course progress trigger) */
+/** Figma 34:7544 — modules shown in "Personalized Learning Path" (My course progress trigger) */
 const PERSONALIZED_LEARNING_PATH_COURSE_LABEL = "Generative AI content creation";
 const PERSONALIZED_LEARNING_PATH_PROGRESS_PCT = 18;
 
@@ -1482,6 +1482,15 @@ export default function LearningPage() {
 
   const closeCourseProgressDialog = useCallback(() => {
     setCourseProgressDialogOpen(false);
+  }, []);
+
+  /** 便于确认浏览器打开的是本仓库的 /learn，而不是别的端口或静态页 */
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Learn | Onboard — Generative AI";
+    return () => {
+      document.title = prev;
+    };
   }, []);
 
   return (

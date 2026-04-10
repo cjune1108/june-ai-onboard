@@ -151,6 +151,37 @@ function IconLightbulb({ className }: { className?: string }) {
   );
 }
 
+/** Figma 43:9775 — plan card clock */
+function IconClockOutline({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v6l4 2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconPencilSmall({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Figma 43:9503 — XP row accent */
+function IconXpAccent({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path
+        d="M10 3c.8 2 3 3.5 3 6.2a3 3 0 11-6 0C7 6.5 9.2 5 10 3z"
+        fill="#c74504"
+        fillOpacity={0.95}
+      />
+    </svg>
+  );
+}
+
 const TIME_SAVED_ROWS = [
   {
     dot: "green" as const,
@@ -177,6 +208,8 @@ const TIME_SAVED_ROWS = [
 export default function App() {
   const [progress, setProgress] = useState(0);
   const [composerFocused, setComposerFocused] = useState(false);
+  /** After “Start my personalized learning journey” — hide that CTA and show Figma 43:9775 today’s plan block */
+  const [personalizedJourneyStarted, setPersonalizedJourneyStarted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const analysisScrollRef = useRef<HTMLDivElement>(null);
   const mainContentScrollRef = useRef<HTMLDivElement>(null);
@@ -211,8 +244,9 @@ export default function App() {
     const el = mainContentScrollRef.current;
     if (!el) return;
     const top = Math.max(0, el.scrollHeight - el.clientHeight);
-    el.scrollTo({ top, behavior: analysisComplete ? "smooth" : "auto" });
-  }, [progress, analysisComplete]);
+    const smooth = analysisComplete || personalizedJourneyStarted;
+    el.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
+  }, [progress, analysisComplete, personalizedJourneyStarted]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#f2f5fa] font-sans text-[#0f1114]">
@@ -396,13 +430,77 @@ export default function App() {
                           </li>
                         ))}
                       </ul>
-                      <Link
-                        to="/learn"
-                        className="mt-6 block w-full rounded-lg bg-[#0056d2] px-8 py-3 text-center text-sm font-semibold leading-6 text-white transition hover:bg-[#0046b0]"
-                      >
-                        Start my personalized learning journey
-                      </Link>
+                      {!personalizedJourneyStarted ? (
+                        <button
+                          type="button"
+                          onClick={() => setPersonalizedJourneyStarted(true)}
+                          className="mt-6 w-full rounded-lg bg-[#0056d2] px-8 py-3 text-center text-sm font-semibold leading-6 text-white transition hover:bg-[#0046b0]"
+                        >
+                          Start my personalized learning journey
+                        </button>
+                      ) : null}
                     </div>
+
+                    {personalizedJourneyStarted ? (
+                      <div
+                        className="animate-fade-in space-y-4 pt-2"
+                        aria-live="polite"
+                        aria-label="Today’s plan from Coach"
+                      >
+                        <h2 className="text-[28px] font-semibold leading-9 tracking-tight text-black">
+                          Greetings! Here is today&apos;s plan
+                        </h2>
+                        <div className="overflow-hidden rounded-2xl border border-[#dae1ed] bg-white p-5 shadow-sm md:p-6">
+                          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+                            <div className="min-w-0 flex-1 space-y-2">
+                              <p className="text-xs font-normal leading-4 text-[#5b6780]">Skills you will learn</p>
+                              <p className="text-sm font-medium leading-5 tracking-tight text-[#0f1114]">
+                                Prompt engineering basics
+                              </p>
+                              <p className="text-sm font-normal leading-5 text-[#0f1114]">
+                                Based on your recent work, it seems that you are less comfortable working with large
+                                data sets. It might help you to spend a bit of time learning this core skill before
+                                continuing in your path.
+                              </p>
+                            </div>
+                            <div className="w-full shrink-0 rounded-lg border border-[#dae1ed] bg-white p-4 lg:w-[224px]">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-base font-semibold leading-5 tracking-tight text-black">
+                                  Today&apos;s plan
+                                </p>
+                                <button
+                                  type="button"
+                                  className="shrink-0 rounded-md p-1 text-[#5b6780] hover:bg-slate-100"
+                                  aria-label="Edit today’s plan"
+                                >
+                                  <IconPencilSmall className="h-5 w-5" />
+                                </button>
+                              </div>
+                              <div className="mt-3 space-y-2">
+                                <div className="flex items-center gap-2 text-base font-normal leading-6 text-[#0f1114]">
+                                  <IconClockOutline className="h-5 w-5 shrink-0 text-[#5b6780]" />
+                                  <span>60min session</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <IconXpAccent className="h-5 w-5 shrink-0" />
+                                  <span className="text-base font-semibold leading-5 tracking-tight text-[#c74504]">
+                                    120 XP
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-6 flex flex-wrap gap-3">
+                            <Link
+                              to="/learn"
+                              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0056d2] px-5 text-base font-semibold text-white transition hover:bg-[#0046b0]"
+                            >
+                              Start today&apos;s session
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </section>
                 )}
                   </div>
