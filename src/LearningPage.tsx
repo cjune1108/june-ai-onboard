@@ -1386,6 +1386,14 @@ function PersonalizedLearningPathDialog({ open, onClose }: { open: boolean; onCl
             </div>
           </div>
 
+          <button
+            type="button"
+            className="w-full shrink-0 rounded-lg border border-[#dae1ed] bg-white px-4 py-2.5 text-left text-sm font-semibold text-[#0056d2] hover:bg-slate-50"
+            aria-label="Switch to standard course structure (placeholder)"
+          >
+            switch to standard course structure
+          </button>
+
           <ul className="flex flex-col gap-2">
             {PERSONALIZED_LEARNING_PATH_MODULES.map((mod, idx) => (
               <li
