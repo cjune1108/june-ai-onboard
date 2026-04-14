@@ -160,40 +160,41 @@ type OutlineItem = {
   badge?: string;
 };
 
+/** Figma 75:21300 — Goal dialog default list */
 const INITIAL_OUTLINE_ITEMS: OutlineItem[] = [
   {
     id: "1",
-    icon: "video",
-    title: "Working with large data sets",
-    meta: "Video • 15min",
+    icon: "reading",
+    title: "Effective data visualizations",
+    meta: "Reading · 8 min",
     selected: true,
   },
   {
     id: "2",
     icon: "video",
-    title: "Why good prompts matter",
-    meta: "Video • 4min",
+    title: "Connect images with data",
+    meta: "Video · 6 min",
     selected: false,
   },
   {
     id: "3",
-    icon: "video",
-    title: "Roles, Context & Framing",
-    meta: "Video • 4min",
+    icon: "reading",
+    title: "The beauty of visualizing",
+    meta: "Reading · 8 min",
     selected: false,
   },
   {
     id: "4",
     icon: "video",
-    title: "Few-shot example formatting",
-    meta: "Video • 4min",
+    title: "A recipe for a powerful visualization",
+    meta: "Video · 5 min",
     selected: false,
   },
   {
     id: "5",
-    icon: "challenge",
-    title: "Iteration & Debugging Prompts",
-    meta: "Practice • 15min",
+    icon: "reading",
+    title: "Correlation and causation",
+    meta: "Reading · 8 min",
     selected: false,
   },
 ];
@@ -556,7 +557,7 @@ function LabExercisePanel({ onLaunch }: { onLaunch: () => void }) {
 
 /** Default copy — before personalization */
 const INITIAL_GOAL_DESCRIPTION =
-  "Understand HTML advanced concepts and be able to build a HTML webpage and add links to webpage.";
+  "Understand HTML advanced concepts and be able to build a HTML webpage.";
 
 /** Sample goal after personalization (CSS path) */
 const PERSONALIZED_GOAL_DESCRIPTION =
@@ -582,6 +583,14 @@ function sessionTimeDisplay(id: SessionTimeChoice): string {
   if (id === "15") return "15min";
   if (id === "30") return "30min";
   if (id === "60") return "1h";
+  return "Custom";
+}
+
+/** Figma 75:21300 — duration shown beside TODAY'S GOAL */
+function goalDialogMinutesLabel(id: SessionTimeChoice): string {
+  if (id === "15") return "15min";
+  if (id === "30") return "30min";
+  if (id === "60") return "60min";
   return "Custom";
 }
 
@@ -665,11 +674,41 @@ function IconPlusGoal({ className }: { className?: string }) {
   );
 }
 
-function IconSendGoal({ className }: { className?: string }) {
+function IconHistoryOutline({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 8v4l3 3" />
+      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
     </svg>
+  );
+}
+
+/** Figma 75:21300 — bordered list; header fixed, list scrolls inside card */
+function GoalDialogOutlineCard({ items }: { items: readonly OutlineItem[] }) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-[#e8eef7] bg-white">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#e8eef7] px-5 pb-2.5 pt-2.5">
+        <p className="text-sm font-bold leading-6 text-[#0f1114]">Current items for today</p>
+        <button
+          type="button"
+          className="shrink-0 rounded-md p-0.5 text-[#5b6780] hover:bg-slate-50"
+          aria-label="History (placeholder)"
+        >
+          <IconHistoryOutline className="h-6 w-6" />
+        </button>
+      </div>
+      <ul
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-3 pt-1"
+        aria-label="Current items for today"
+      >
+        {items.map((row) => (
+          <li key={row.id} className="py-3">
+            <p className="text-sm font-semibold leading-5 text-[#0f1114]">{row.title}</p>
+            <p className="mt-0.5 text-xs font-normal leading-[18px] text-[#5b6780]">{row.meta}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -703,12 +742,14 @@ function GoalDialog({
   onClose,
   outlineItems,
   todayGoalDescription,
+  todayGoalMinutesLabel,
   onApplyGeneratedPlan,
 }: {
   open: boolean;
   onClose: () => void;
   outlineItems: readonly OutlineItem[];
   todayGoalDescription: string;
+  todayGoalMinutesLabel: string;
   onApplyGeneratedPlan: (items: OutlineItem[]) => void;
 }) {
   const [view, setView] = useState<"default" | "processing" | "complete">("default");
@@ -832,31 +873,18 @@ function GoalDialog({
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden px-6 pb-4">
-          <div className="flex min-h-[20px] w-full shrink-0 items-center gap-2">
+          <div className="flex w-full shrink-0 items-center gap-2">
             <img src={`${base}goal-modal-target.svg`} alt="" className="h-4 w-4 shrink-0" width={16} height={16} />
             <p className="text-sm font-semibold leading-[18px] tracking-tight text-[#5b6780]">TODAY&rsquo;S GOAL</p>
             <span className="min-w-0 flex-1" aria-hidden />
-            <img src={`${base}goal-modal-xp.png`} alt="" className="h-5 w-5 shrink-0 object-contain" width={20} height={20} />
-            <p className="shrink-0 text-right text-base font-semibold leading-5 tracking-tight text-[#c74504]">
-              {view === "complete" ? "90XP" : "60XP"}
-            </p>
+            <p className="shrink-0 text-base font-semibold leading-5 tracking-tight text-[#0f1114]">{todayGoalMinutesLabel}</p>
           </div>
 
           {view === "default" ? (
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
-              <p className="text-base font-normal leading-6 text-[#0f1114]">{todayGoalDescription}</p>
-
-              <div className="mt-2.5 rounded-xl border border-[#e8eef7] bg-white px-6 py-6">
-                <ul className="flex flex-col gap-2">
-                  {outlineItems.map((row) => (
-                    <li key={row.id}>
-                      <p className="text-sm font-semibold leading-snug text-[#0f1114]">{row.title}</p>
-                      <p className="mt-0.5 text-xs font-normal leading-[18px] text-[#5b6780]">{row.meta}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <>
+              <p className="shrink-0 text-base font-normal leading-6 text-[#0f1114]">{todayGoalDescription}</p>
+              <GoalDialogOutlineCard items={outlineItems} />
+            </>
           ) : view === "processing" ? (
             <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden">
               <p className="shrink-0 text-base font-medium leading-6 text-[#0f1114]">Personalization in progress</p>
@@ -883,20 +911,10 @@ function GoalDialog({
               </div>
             </div>
           ) : (
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
-              <p className="text-base font-normal leading-6 text-[#0f1114]">{PERSONALIZED_GOAL_DESCRIPTION}</p>
-
-              <div className="mt-2.5 rounded-xl border border-[#e8eef7] bg-white px-6 py-6">
-                <ul className="flex flex-col gap-2">
-                  {GENERATED_OUTLINE_ITEMS.map((row) => (
-                    <li key={row.id}>
-                      <p className="text-sm font-semibold leading-snug text-[#0f1114]">{row.title}</p>
-                      <p className="mt-0.5 text-xs font-normal leading-[18px] text-[#5b6780]">{row.meta}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            <>
+              <p className="shrink-0 text-base font-normal leading-6 text-[#0f1114]">{PERSONALIZED_GOAL_DESCRIPTION}</p>
+              <GoalDialogOutlineCard items={GENERATED_OUTLINE_ITEMS} />
+            </>
           )}
         </div>
 
@@ -907,7 +925,7 @@ function GoalDialog({
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center text-[#0056d2]" aria-hidden>
                   <IconPlusGoal className="h-5 w-5" />
                 </span>
-                <span className="py-1 text-base font-normal leading-6">Adjust my goal</span>
+                <span className="py-1 text-base font-normal leading-6">Adjust my goal and time</span>
               </div>
             ) : (
               <div className="flex w-full items-center gap-1 rounded-lg bg-[#f2f5fa] p-1.5 pl-1 focus-within:ring-2 focus-within:ring-[#0056d2]/25">
@@ -916,8 +934,8 @@ function GoalDialog({
                 </span>
                 <input
                   type="text"
-                  className="min-w-0 flex-1 bg-transparent py-2 text-base font-normal leading-6 text-[#0f1114] outline-none placeholder:text-[#5b6780] disabled:opacity-60"
-                  placeholder="Adjust my goal"
+                  className="min-w-0 flex-1 bg-transparent py-2 pr-2 text-base font-normal leading-6 text-[#0f1114] outline-none placeholder:text-[#5b6780] disabled:opacity-60"
+                  placeholder="Adjust my goal and time"
                   value={adjustDraft}
                   onChange={(e) => setAdjustDraft(e.target.value)}
                   onKeyDown={(e) => {
@@ -927,17 +945,8 @@ function GoalDialog({
                     }
                   }}
                   disabled={view === "processing"}
-                  aria-label="Adjust my goal"
+                  aria-label="Adjust my goal and time"
                 />
-                <button
-                  type="button"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#0056d2] hover:bg-white/80 disabled:pointer-events-none disabled:opacity-35"
-                  aria-label="Send"
-                  disabled={!adjustDraft.trim() || view === "processing"}
-                  onClick={submitAdjust}
-                >
-                  <IconSendGoal className="h-5 w-5" />
-                </button>
               </div>
             )}
 
@@ -976,12 +985,14 @@ function GoalDialog({
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                className="inline-flex w-full items-center justify-center rounded-lg bg-[#0056d2] px-4 py-2.5 text-base font-semibold text-white hover:brightness-110 sm:w-auto sm:self-end"
-              >
-                Regenerate my plan
-              </button>
+              <div className="flex w-full justify-end">
+                <button
+                  type="button"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0056d2] px-4 py-2.5 text-base font-semibold text-white hover:brightness-110"
+                >
+                  Regenerate my plan
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -1283,41 +1294,19 @@ function ChangeTimeDialog({
   );
 }
 
-/** Figma 34:7544 — modules shown in "Personalized Learning Path" (My course progress trigger) */
-const PERSONALIZED_LEARNING_PATH_COURSE_LABEL = "Generative AI content creation";
+/** Figma 53:15329 — Personalized learning path dialog (My course progress) */
 const PERSONALIZED_LEARNING_PATH_PROGRESS_PCT = 18;
 
-const PERSONALIZED_LEARNING_PATH_MODULES: readonly { title: string; description: string; recommended: boolean }[] = [
-  {
-    title: "HTML webpage basics",
-    description: "Understand HTML advanced concepts and be able to build a HTML webpage.",
-    recommended: true,
-  },
-  {
-    title: "Working with large data sets",
-    description: "Prepare, explore, and summarize structured data so models and stakeholders can trust your inputs.",
-    recommended: false,
-  },
-  {
-    title: "Why good prompts matter",
-    description: "Write clear instructions, constraints, and success criteria to get reliable outputs from GenAI tools.",
-    recommended: false,
-  },
-  {
-    title: "Roles, context & framing",
-    description: "Set persona, audience, and background so the model stays on task across longer sessions.",
-    recommended: false,
-  },
-  {
-    title: "Few-shot example formatting",
-    description: "Curate short labeled examples that teach format and tone without overwhelming the context window.",
-    recommended: false,
-  },
-  {
-    title: "Iteration & debugging prompts",
-    description: "Refine prompts from failures, compare variants, and document what works for your team.",
-    recommended: false,
-  },
+const PERSONALIZED_LEARNING_PATH_MODULE_COPY =
+  "Set up Jupyter, learn core syntax, and write your first SELECT queries.";
+
+const PERSONALIZED_LEARNING_PATH_SQL_MODULES: readonly {
+  title: string;
+  youAreHere?: boolean;
+}[] = [
+  { title: "Introduction to SQL and Environment" },
+  { title: "Data Querying, Aggregation & Joins" },
+  { title: "Advance Query Techniques", youAreHere: true },
 ];
 
 function PersonalizedLearningPathDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -1347,76 +1336,71 @@ function PersonalizedLearningPathDialog({ open, onClose }: { open: boolean; onCl
         role="dialog"
         aria-modal="true"
         aria-labelledby="personalized-learning-path-title"
-        className="flex max-h-[min(715px,90vh)] w-full max-w-[635px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
+        className="flex max-h-[min(90vh,680px)] w-full max-w-[620px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-start gap-1 p-6 pb-4">
-          <div className="min-w-0 flex-1 pr-2">
-            <h2
-              id="personalized-learning-path-title"
-              className="text-[30px] font-semibold leading-9 tracking-[-0.015em] text-[#0f1114]"
+        <div className="shrink-0 px-6 pb-1 pt-6">
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-[#0f1114] hover:bg-slate-100"
+              aria-label="Close dialog"
+              onClick={onClose}
             >
-              Personalized Learning Path
-            </h2>
-            <p className="mt-1 text-base font-normal leading-6 text-[#1f1f1f]">
-              Course content may be personalized further based on your performance.
-            </p>
+              <IconModalClose className="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium leading-4 text-[#5b6780] hover:bg-slate-50"
+              aria-label="Non-personalized course (placeholder)"
+            >
+              non-personalized course
+            </button>
           </div>
-          <button
-            type="button"
-            className="shrink-0 rounded-lg p-1.5 text-[#0f1114] hover:bg-slate-100"
-            aria-label="Close dialog"
-            onClick={onClose}
+          <h2
+            id="personalized-learning-path-title"
+            className="mt-3 text-2xl font-semibold leading-8 tracking-tight text-[#0f1114] sm:text-[26px] sm:leading-9"
           >
-            <IconModalClose className="h-6 w-6" />
-          </button>
+            Personalized learning path
+          </h2>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 pb-4">
-          <div className="flex shrink-0 flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-4 text-base font-normal leading-6 text-[#0f1114]">
-              <span className="min-w-0">{PERSONALIZED_LEARNING_PATH_COURSE_LABEL}</span>
-              <span className="shrink-0 tabular-nums">{PERSONALIZED_LEARNING_PATH_PROGRESS_PCT}%</span>
-            </div>
-            <div className="h-1 w-full overflow-hidden rounded-sm bg-[#dae1ed]">
+        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-6 pb-6">
+          <div className="flex shrink-0 flex-col gap-2">
+            <p className="text-sm font-normal leading-5 text-[#5b6780]">
+              Course Completion - {PERSONALIZED_LEARNING_PATH_PROGRESS_PCT}%
+            </p>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-[#ede9fe]">
               <div
-                className="h-full rounded-sm bg-[#0056d2]"
+                className="h-full rounded-full bg-[#7c3aed]"
                 style={{ width: `${PERSONALIZED_LEARNING_PATH_PROGRESS_PCT}%` }}
               />
             </div>
           </div>
 
-          <button
-            type="button"
-            className="w-full shrink-0 rounded-lg border border-[#dae1ed] bg-white px-4 py-2.5 text-left text-sm font-semibold text-[#0056d2] hover:bg-slate-50"
-            aria-label="Switch to standard course structure (placeholder)"
-          >
-            switch to standard course structure
-          </button>
-
-          <ul className="flex flex-col gap-2">
-            {PERSONALIZED_LEARNING_PATH_MODULES.map((mod, idx) => (
+          <ul className="flex flex-col gap-3">
+            {PERSONALIZED_LEARNING_PATH_SQL_MODULES.map((mod, idx) => (
               <li
                 key={idx}
-                className="rounded-2xl border border-[#dae1ed] bg-white p-4"
+                className="rounded-2xl border border-slate-200/90 bg-white shadow-sm"
               >
-                <div className="flex items-start gap-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-base font-semibold leading-5 tracking-[-0.03px] text-[#0f1114]">{mod.title}</p>
-                    <p className="mt-2 text-xs font-normal leading-[18px] text-[#0f1114]">{mod.description}</p>
-                  </div>
-                  {mod.recommended ? (
-                    <span className="shrink-0 rounded-full bg-[#155dfc] px-2 py-0.5 text-xs font-semibold uppercase leading-4 tracking-wide text-white">
-                      Recommended
+                <div className="flex min-h-[120px] flex-col justify-center p-5 sm:min-h-[132px]">
+                  {mod.youAreHere ? (
+                    <span className="mb-2 inline-flex w-fit rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold leading-4 text-[#4c1d95]">
+                      You are here
                     </span>
                   ) : null}
+                  <p className="text-base font-semibold leading-6 tracking-tight text-[#1e3a5f]">{mod.title}</p>
+                  <p className="mt-2 text-sm font-normal leading-5 text-[#5b6780]">
+                    {PERSONALIZED_LEARNING_PATH_MODULE_COPY}
+                  </p>
                 </div>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="flex shrink-0 justify-end border-t border-slate-100 px-6 py-5">
+        <div className="flex shrink-0 justify-end border-t border-slate-100 px-6 py-4">
           <button
             type="button"
             onClick={onClose}
@@ -1732,6 +1716,7 @@ export default function LearningPage() {
         onClose={closeGoalDialog}
         outlineItems={outlineItems}
         todayGoalDescription={todayGoalDescription}
+        todayGoalMinutesLabel={goalDialogMinutesLabel(sessionTimeId)}
         onApplyGeneratedPlan={applyGeneratedPlan}
       />
       <ChangeTimeDialog
